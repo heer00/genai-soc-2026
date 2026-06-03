@@ -56,3 +56,40 @@ PERSONAS = {
     }
 }
 print(PERSONAS.keys())
+def build_messages(persona_name, user_input):
+    persona = PERSONAS[persona_name]
+    messages = []
+    messages.append({
+        "role": "system",
+        "content": persona["system_prompt"]
+    })
+    for example in persona["few_shot_examples"]:
+        messages.append({
+            "role": "user",
+            "content": example["user"]
+        })
+        messages.append({
+            "role": "assistant",
+            "content": example["assistant"]
+        })
+    messages.append({
+        "role": "user",
+        "content": user_input
+    })
+    return messages
+
+def chat_with_ai(persona_name, user_input):
+    messages = build_messages(persona_name, user_input)
+
+    response = client.chat.completions.create(
+        model = "llama-3.3-70b-versatile",
+        messages = messages,
+        temperature = 0.7
+    )
+    return response.choices[0].message.content
+
+reply = chat_with_ai(
+    "Tech expert", 
+    "What is Groq API?How does it work?"
+)
+print("AI Response: ", reply)

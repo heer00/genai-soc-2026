@@ -1,5 +1,5 @@
 from groq import Groq; import os; from dotenv import load_dotenv;load_dotenv()
-
+import time
 api_key = os.getenv("GROQ_API_KEY")
 print("Groq api key loaded: ", bool(api_key))
 client = Groq(api_key=api_key)
@@ -81,12 +81,21 @@ def build_messages(persona_name, user_input):
 def chat_with_ai(persona_name, user_input):
     messages = build_messages(persona_name, user_input)
 
-    response = client.chat.completions.create(
+    stream = client.chat.completions.create(
         model = "llama-3.3-70b-versatile",
         messages = messages,
-        temperature = 0.7
+        max_tokens = 150,
+        temperature = 0.7,
+        stream = True
     )
-    return response.choices[0].message.content
+    full_response = ""
+    for chunk in stream:
+        content = chunk.choices[0].delta.content
+        if content:
+            full_response += content
+            print(content, end="", flush=True)
+            time.sleep(0.05)
+    return full_response
 
 reply = chat_with_ai(
     "Tech expert", 

@@ -1,4 +1,5 @@
 from groq import Groq; import os; from dotenv import load_dotenv;load_dotenv()
+import gradio as gr
 import time
 api_key = os.getenv("GROQ_API_KEY")
 print("Groq api key loaded: ", bool(api_key))
@@ -53,6 +54,21 @@ PERSONAS = {
             }
         ],
         "output_format": "text"
+    },
+    "Math Tutor": {
+        "system_prompt": (  
+            "You are a math tutor who explains concepts clearly and provides step-by-step solutions to problems. "
+            "You are patient and encourage students to ask questions until they understand the material."
+        ),
+        "few_shot_examples": [
+            {
+                "user": "What is the quadratic formula?",
+                "assistant": (
+                    "The quadratic formula is: x = (-b ± √(b² - 4ac)) / 2a"
+                )
+            }
+        ],
+        "output_format": "text"
     }
 }
 print(PERSONAS.keys())
@@ -96,9 +112,22 @@ def chat_with_ai(persona_name, user_input):
             print(content, end="", flush=True)
             time.sleep(0.05)
     return full_response
+def respond(message,persona):
+    reply = chat_with_ai(persona, message)
+    return reply
 
-reply = chat_with_ai(
-    "Tech expert", 
-    "What is Groq API?How does it work?"
+# GUI - using Gradio
+demo = gr.Interface(
+    fn = respond,
+    inputs = [
+        gr.Textbox(label="Your Message"),
+        gr.Dropdown(
+            choices=list(PERSONAS.keys()),
+            value = list(PERSONAS.keys())[0],
+            label = "Choose a persona"
+        )
+    ],
+    outputs = gr.Textbox(label="AI Response"),
+    title = "PromptForge: Persona-Based AI Chat"
 )
-print("AI Response: ", reply)
+demo.launch()

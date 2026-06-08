@@ -109,25 +109,92 @@ def chat_with_ai(persona_name, user_input):
         content = chunk.choices[0].delta.content
         if content:
             full_response += content
-            print(content, end="", flush=True)
+            pass
             time.sleep(0.05)
     return full_response
-def respond(message,persona):
-    reply = chat_with_ai(persona, message)
-    return reply
+# def respond(message,chat_history,persona):
+#     reply = chat_with_ai(persona, message)
+#     chat_history.append((message, reply))
 
-# GUI - using Gradio
-demo = gr.Interface(
-    fn = respond,
-    inputs = [
-        gr.Textbox(label="Your Message"),
-        gr.Dropdown(
-            choices=list(PERSONAS.keys()),
-            value = list(PERSONAS.keys())[0],
-            label = "Choose a persona"
-        )
-    ],
-    outputs = gr.Textbox(label="AI Response"),
-    title = "PromptForge: Persona-Based AI Chat"
-)
+#     return "",chat_history
+
+# # GUI - using Gradio
+# with gr.Blocks() as demo:
+#     gr.Markdown("# PromptForge")
+#     persona_dropdown = gr.Dropdown(
+#         choices = list(PERSONAS.keys()),
+#         value = list(PERSONAS.keys())[0],
+#         label = "Choose a persona"
+#     )
+#     chatbot = gr.Chatbot()
+#     user_input = gr.Textbox(
+#         placeholder="Type your message here and press Enter",
+#         label="Your Message"
+#     )
+#     send_btn = gr.Button("Send")
+#     send_btn.click(
+#         fn = respond,
+#         inputs = [
+#             user_input,
+#             chatbot,
+#             persona_dropdown
+#         ],
+#         outputs = [
+#             user_input,
+#             chatbot
+#         ]
+#     )
+def respond(message, chat_history, persona):
+    
+    if chat_history is None:
+        chat_history = []
+
+    reply = chat_with_ai(persona, message)
+
+    chat_history.append(
+        {"role": "user", "content": message}
+    )
+
+    chat_history.append(
+        {"role": "assistant", "content": reply}
+    )
+
+    return "", chat_history
+
+
+with gr.Blocks() as demo:
+
+    gr.Markdown("# PromptForge")
+
+    persona_dropdown = gr.Dropdown(
+        choices=list(PERSONAS.keys()),
+        value=list(PERSONAS.keys())[0],
+        label="Choose Persona"
+    )
+
+    chatbot = gr.Chatbot(
+        # type="messages",
+        label="Conversation"
+    )
+
+    user_input = gr.Textbox(
+        label="Your Message",
+        placeholder="Ask something..."
+    )
+
+    send_btn = gr.Button("Send")
+
+    send_btn.click(
+        fn=respond,
+        inputs=[
+            user_input,
+            chatbot,
+            persona_dropdown
+        ],
+        outputs=[
+            user_input,
+            chatbot
+        ]
+    )
+
 demo.launch()

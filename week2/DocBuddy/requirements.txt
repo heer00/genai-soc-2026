@@ -1,0 +1,11 @@
+langchain
+langchain-community
+langchain-huggingface
+langchain-text-splitters
+langchain-groq
+chromadb
+sentence-transformers
+pypdf
+gradio
+groq
+python-dotenv

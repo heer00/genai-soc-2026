@@ -1,0 +1,7 @@
+.env
+.env.example
+chroma_store/
+__pycache__/
+*.pyc
+venv/
+.venv/
